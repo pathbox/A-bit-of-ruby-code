@@ -10,16 +10,6 @@
 
 #end
 
-require 'timeout'
-
-begin
-  timeout(0.1){
-    sleep 0.2
-  }
-rescue TimeOut::Error => e
-  puts e.message
-end
-
 i= 3
 begin
   xxxx
@@ -42,12 +32,4 @@ ensure
   puts "I will be execute"
 end
 
-lock_version
-lock_version
-set_locking_column :lock_client_column
-set_locking_column :lock_client_column
-set_locking_column :lock_client_column
-lock_version
-customer.orders.size
-customer.orders(true).empty?
 

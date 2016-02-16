@@ -1,0 +1,6 @@
+#乐观锁
+lock_version
+lock_version
+set_locking_column :lock_client_column
+set_locking_column :lock_client_column
+set_locking_column :lock_client_column
