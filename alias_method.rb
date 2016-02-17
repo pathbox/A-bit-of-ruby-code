@@ -6,7 +6,7 @@
 # 为得到同样的功能，可以重命名（alias）旧方法，并添加一个新的方法定义来调用旧方法，并确保旧方法的前后条件得到保留。
 
 class String
-  alias_method :original_reverse, :reverse  # alias_method :old_def, :new_def
+  alias_method :original_reverse, :reverse  # alias_method :new_name_for_old_def, :old_to_new_def
   def reverse
     puts "reversing, please wait..."
   end
