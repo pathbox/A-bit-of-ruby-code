@@ -16,4 +16,4 @@ end
 "dog".original_reverse # god
 
 # 原来 String 只有 reverse方法没有original_reverse方法。
-# 使用alias_method后, original_reverse 代替并保留reverse方法的功能, reverse实现代码中新更改后的功能
+# 使用alias_method后, original_reverse 代替并保留reverse方法的功能(相当于reverse方法的重命名), reverse实现代码中新更改后的功能
