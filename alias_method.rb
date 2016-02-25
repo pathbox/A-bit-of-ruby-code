@@ -4,6 +4,7 @@
 # 标准的面向对象方法是继承并重载，再调用父类方法。
 # 仅当你有对象实例化的控制权时才有用，经常不是这种情况，继承也就没有价值。
 # 为得到同样的功能，可以重命名（alias）旧方法，并添加一个新的方法定义来调用旧方法，并确保旧方法的前后条件得到保留。
+# 通过这个方式, 可以一定意义上做到方法的重写. 因为新方法可以有新的行为,而且还保留着旧方法的访问
 
 class String
   alias_method :original_reverse, :reverse  # alias_method :new_name_for_old_def, :old_to_new_def

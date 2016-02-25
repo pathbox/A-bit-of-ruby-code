@@ -1,3 +1,7 @@
+# rails 中为了能够实现类型装饰模式的行为,基于上面的这个 alias_method 做了一个 alias_method_chain 的方法,
+# 它的作用就是能够在原本执行的方法前后加上一些起装饰作用的代码.
+
+
 # require 'active_support'
 # class A
 #   def m1
