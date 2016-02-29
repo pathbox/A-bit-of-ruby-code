@@ -14,7 +14,7 @@ ensure
   # though it’s good practice to do so: not explicitly deleting unused Tempfiles can potentially
   # leave behind large amounts of tempfiles on the filesystem until they’re garbage collected.
   #The existence of these temp files can make it harder to determine a new Tempfile filename.
-                                                                                     
+
   file.close
   file.unlink
 end
