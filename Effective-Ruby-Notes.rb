@@ -29,3 +29,24 @@ $VERBOSE = true  # 可以看所有警告信息
 
 # 当你想继承体系中的一个方法时，super可以帮你调用它
 # super 和super() 不一样。super相当于传递了所有参数，super()是传递空参数
+
+class Parent
+  def initialize(name)
+    @name = name
+  end
+end
+# 使用super, 可以继承父类的initialize, 要不之类的initialize会覆盖父类的initialize
+class Child < Parent
+  def initialize(name, grade)
+    super(name) # Initialize Parent
+    @garde = garde
+  end
+end
+
+# 使用 Person = Struct.new(:name, :age) 代替hash. Struct 可以使用block
+
+Reading = Struct.new(:date, :high, :low) do
+  def mean
+    (high + low) / 2
+  end
+end
