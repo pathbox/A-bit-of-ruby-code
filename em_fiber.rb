@@ -31,7 +31,10 @@ do_request_fiber = Fiber.new do |args|
   http.callback { EM.stop; f.resume(http)}  # 第二次resume,将http作为返回值,返回给Fiber.yield
   http.errback {EM.stop; f.resume(http)}
 
-  puts "Fetched page #1 :#{Fiber.yield.response_header.status}" # Fiber.new的block代码在一个fiber中执行,调用fiber block(Fiber.yield) 在另一个fiber中执行。所以是有两个fiber,两个线程在执行
+  puts "Fetched page #1 :#{Fiber.yield.response_header.status}" # Fiber.new的block代码在一个fiber中执行,调用fiber block(Fiber.yield)回到主线程。
+  # 所以是有两个线程在执行. 主线程负责loop,不断的loop直到http.callback激发条件满足(hao123.com返回响应),要么errrback满足响应。
+  # 此时,callback中的代码在主线程中被执行. 即回调函数在主线程中执行。
+  # 最后一步是回到Fiber.yield, Fiber.yield得到callback传的参数http,继续执行结束
 
 end
 
