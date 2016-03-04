@@ -63,7 +63,15 @@ style = Notebooks::Binding.new
 
 # 类变量是在类中具有全局性的。而不是通过类变量在每个需要它的方法中传来传去。变量和实例变量才适合做这个
 
+# clone 和 dump 返回的是浅拷贝, Marshal.load(Marshal.dump(a)) 返回的是深拷贝
+# 对象副本会持有自身的内存空间,Marshal::dump在序列化创建的字节流也是会占用内存。
 
+# map 已经可以被pluck或reduce给取代了. map很多时候不是一个性能最佳的使用
+users.select{|u| u.age >= 21}.map(&:name)
+users.reduce([]) do |names, user|
+  names << user.name if user.age >= 21
+  names
+end
 
 
 
