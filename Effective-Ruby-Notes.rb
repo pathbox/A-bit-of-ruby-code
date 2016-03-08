@@ -114,9 +114,57 @@ end
 
 String.say_hi # => "Hallo"
 
+# Forwardable模块,它将一个存有要代理的方法的链表绑定到一个实例变量上。def_delegators 方法将会产生一些实例方法，
+# 这些实例方法会直接将请求的消息传递给目标对象。使用委托我们需要特别指定那些我们想通过公共接口暴露的方法。使用继承我们会继承所有父类的方法
+# 事实上并不需要所有父类的方法都继承,而是需要部分父类方法。这时候使用委托是好的选择
+# 举例：把RaisingHash#erase!方法转发给@hash.delete
+# self.erase! to @hash.delete
+def_delegator(:@hash, :delete, :erase!)
+# 在设置完要委托方法后要确保initialize方法创建了在代理声明中指定的实例变量
+def initialize
+  @hash = Hash.new do |hash, key|
+    raise(KeyError, "invalid key '#{key}' ")
+  end
+end
 
+# StringExtra 类拥有String类所有的共有方法
+require 'forwardable'
+class StringExtra
+  extend(Forwardable)
+  def_delegator(:@string, *String.public_instance_methods(false))
 
+  def initialize(str = "")
+    @string = str
+  end
+  def only_space?
+    #...
+  end
+end
 
+# 使用refinement实现猴子补丁。refine只接受类作为参数
+module OnlySpace
+  refine(String) do
+    def only_space?
+      #...
+    end
+  end
+end
+# 在要使用的地方 using(OnlySpace)激活这个refinement。你可以在脚本开始的位置激活,也可以在类或者模块里激活
+# using只接受包含refinement代码的模块(这里是OnlySpace)。这也是refinement比猴子补丁更安全的原因。猴子补丁的修改是全局可见的
+# refinement可以自动在可见域之外让修改失效。
+class Person
+  using(OnlySpace)
+  def initialize(name)
+    @name = name
+  end
+  def valid?
+    @name.only_space?
+  end
+end
+
+# 你定义了一个继承自Person的Customer类,那在之类是否就无法使用only_space?方法?之类Coustomer实例是可以调用valid?方法，
+# 因为valid?方法定义在Person类中。但是在Customer类中直接定义的方法将无法使用only_space?方法，除非refinement在Customer类中被
+# 再次激活。
 
 
 
