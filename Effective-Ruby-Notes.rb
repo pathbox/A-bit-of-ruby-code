@@ -73,8 +73,46 @@ users.reduce([]) do |names, user|
   names
 end
 
+# define_method 只针对类和模块,对于对象我们可以使用define_singleton_method
 
+class AuditDecorator
+  def initialize(object)
+    @object = obkect
+    @logger = Logger.new($stdout)
+    @object.public_methods.each do |name|
+      define_singleton_method(name) do |*args, &block|
+        logger.info("calling '#{name}' on #{@object.inspect}")
+        @object.send(name, *args, &block)
+      end
+    end
+  end
+end
 
+# eval 方法和其他解释性语言功能类似---在运行时执行一段用字符串拼接而成的合法的Ruby代码。
+# 当然这是一种非常危险的操作，尤其是对于那些处理不可信数据的应用程序。
+# Kernel模块定义了一个私有方法binding, 它可以捕获当前的临时域并把这个临时域封装到一个Binding(绑定)对象中
+# 作为返回结果。这个指定的上下文是eval方法的第二个参数
+
+def glass_case_of_emotion
+  x = "I am in a #{__method__.to_s.tr('__',' ')}"
+  binding
+end
+# binding让eval找到了x
+eval("x", glass_case_of_emotion)  # => "I am in a glass case of emotion"
+
+# 使用instance_eval 可以访问它的实例变量和已经定义的方法
+w = Strinrg.new("Muffler Bearing")
+w.instance_eval{@name} # => Muffler Bearing
+
+# 使用instance_eval生成类方法. 同样的 class_eval也可以
+
+String.instance_eval do
+  def say_hi
+    "Hallo"
+  end
+end
+
+String.say_hi # => "Hallo"
 
 
 
