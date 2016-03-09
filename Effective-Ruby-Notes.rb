@@ -205,6 +205,21 @@ D.ancestors # => [B, A, D, Object, Kernel, BasicObject] # include 的module 将�
 # prepend 可以用alias_method 方法实现类似效果。
 # prepend 将模块插入到接收者之前。include 将模块插入到接收者和其超类之间。
 
+# MiniTest
+class VersionTest < MiniTest::Unit::TestCase
+  def setup  # 初始化测试数据
+    @v1 = Version.new("2.1.1")
+  end
+  def test_major_number # use test_ start
+    v = Version.new(1,2,3)
+    assert(v.major == 2, "major should be 2")
+    assert_equal(2, v.major, "major")
+    assert_equal(1, v.minor, "minor")
+  end
+end
+# rake test 运行所有测试
+# 使用describe方法创建测试类，使用it定义测试用例
+# 虽然在需求说明测试中，断言仍然可用，但是更推荐使用注入到Object中的期望方法
 
 
 
