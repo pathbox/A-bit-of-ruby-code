@@ -166,6 +166,46 @@ end
 # 因为valid?方法定义在Person类中。但是在Customer类中直接定义的方法将无法使用only_space?方法,实例变量也不能直接使用only_space?方法，除非refinement在Customer类中被
 # 再次激活。
 
+# 使用模块前置时请谨慎思考
+# 我们从Ruby内部结构了解到向类引入模块实际上改变了类的继承结构。当一个类在include模块内时,Ruby会创建一个单例类来保存模块中的方法
+# 并把这个类作为不可见的父类。当一个类有多个模块时，会倒序搜索方法。
+
+module A
+  def who
+    "A#who"
+  end
+end
+
+module B
+  def who
+    "B#who"
+  end
+end
+
+class C
+  include A
+  include B
+  def who
+    "C#who"
+  end
+end
+
+C.ancestors # => [C, B, A, Object, Kernel, BasicObject]
+C.new.who
+#include方法会在类C和它的父类之间插入模块，所以相比A模块而已，B模块会先被搜索。
+#基于ancestors的输出结果，调用super它将会执行B模块的who方法。module的优先级会大于之类的父类方法，并且按照include顺序倒序排序搜索，所以B 优先于 A
+class D
+  prepend A
+  prepend B
+  def who
+    "D#who"
+  end
+end
+D.ancestors # => [B, A, D, Object, Kernel, BasicObject] # include 的module 将在本身类D之前。类中的方法无法覆盖module中的方法
+# prepend 可以用alias_method 方法实现类似效果。
+# prepend 将模块插入到接收者之前。include 将模块插入到接收者和其超类之间。
+
+
 
 
 
