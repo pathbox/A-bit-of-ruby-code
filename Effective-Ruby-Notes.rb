@@ -163,7 +163,7 @@ class Person
 end
 
 # 你定义了一个继承自Person的Customer类,那在之类是否就无法使用only_space?方法?之类Coustomer实例是可以调用valid?方法，
-# 因为valid?方法定义在Person类中。但是在Customer类中直接定义的方法将无法使用only_space?方法，除非refinement在Customer类中被
+# 因为valid?方法定义在Person类中。但是在Customer类中直接定义的方法将无法使用only_space?方法,实例变量也不能直接使用only_space?方法，除非refinement在Customer类中被
 # 再次激活。
 
 
