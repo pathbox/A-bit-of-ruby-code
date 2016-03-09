@@ -221,6 +221,27 @@ end
 # 使用describe方法创建测试类，使用it定义测试用例
 # 虽然在需求说明测试中，断言仍然可用，但是更推荐使用注入到Object中的期望方法
 
+# 收集内存信息
+require 'objspace'
+
+GC.start
+File.open("memory.json","w") do |file|
+  ObjectSpace.dump_all(output: file)
+end
+
+# 避免在循环中使用对象字母量
+# 在Ruby 2.1及更高的版本中冻结字符串字面量，相当于把它作为常量。之前的例子中的块只会在第一次调用时分配一个字符串。
+# 随后所有的调用都会复用之前的字符串对象。一旦冻结字符串字面量，该字面量就可以被整个程序共享
+# 每当新建一个对象时，垃圾回收机制会被调用一次
+
+# bad
+errors.any? {|e| %(F1 F2 F3).include?(e.code)}
+# good
+F_CODES = %(F1 F2 F3).map(&:freeze).freeze
+errors.any? {|e| F_CODES.include?(e.code)}
+errors.any? {|e| "FATAL".freeze == e.code}
+
+# 考虑记忆化大开销计算
 
 
 
