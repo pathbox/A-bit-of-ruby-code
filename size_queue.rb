@@ -18,4 +18,5 @@ consumer = Thread.new do
   end
 end
 
+
 consumer.join

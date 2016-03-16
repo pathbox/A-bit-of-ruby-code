@@ -8,4 +8,5 @@ def towers(list)
       list.push[1,src,dst,aux]
       list.push[n-1,src,aux,dst]
     end
+  end
 end
