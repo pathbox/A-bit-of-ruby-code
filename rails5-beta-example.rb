@@ -168,6 +168,41 @@ class MainpageController < ActionController::Metal
   end
 end
 
+include AbstractController::Rendering
+include ActionController::Rendering
+include ActionController::ImplicitRender
+include ActionView::Rendering
+
+def render_to_body(*args)
+  template = ERB.new File.read("#{params[:action]}.html.erb")
+  template.result(binding)
+end
+
+run routes
+
+# config.ru
+# require 'bundler/setup'
+# require 'action_dispatch'
+# require 'action_view'
+require 'action_controller'
+routes = ActionDispatch::Routing::RouteSet.new
+routes.draw do
+  get '/' => 'mainpage#index'
+  get '/page/:id' => 'mainpage#show'
+end
+class MainpageController < ActionController::Base
+  prepend_view_path('app/views/')
+  def index
+    @local_var = 12345
+  end
+  def show
+  end
+end
+use ActionDispatch::DebugExceptions
+run routes
+
+rackup config.ru 运行以上代码，默认在 http://localhost:9292/
+
 
 
 
