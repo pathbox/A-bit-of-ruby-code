@@ -204,11 +204,66 @@ run routes
 rackup config.ru 运行以上代码，默认在 http://localhost:9292/
 
 
+Middleware 在路由转发之后，Controller#action接收之前，对环境和应用进行处理。
+路由转发-》 middleware -》 controller#action
 
 
+app应用 --> (Rack) --> 应用服务器 --> Web服务器 --> 外部世界;
+
+Rack 提供了一个与Web服务器打交道最精简的接口，通过这个接口，我们应用很轻松的就能提供Web服务(接收Web请求，相应处理结果)。
+上面的应用服务器就是对Rack的进一步封装
+这个接口的条件是： 传递一个程序(你没看错，就是把一个程序当做参数，下文以app代替)
 
 
+class YourRack
+  def initialize app
+    @app = app
+  end
+  def call env
+    @app.call(env)
+  end
+end
 
+ActionController#cookies 读写cookies数据
+简单的cookie数据
+浏览器关闭则删除
+cookies[:user_name] = "david"
+设置cookie数据的生命周期为一小时
+cookies[:login] = { value: "XJ-122", expires: 1.hour.from_now}
+# cookie 数据签名(用到secrets.secret_key_base), 防止用户篡改
+# 可以使用 cookies.signed[:name] 获取这个签名后的数据
+cookies.signed[:user_id] = current_user.id
+# 设置一个永久cookie，默认生命周期是20年
+cookies.permanent[:login] = "XJ-122"
+# 你可以链式调用以上方法
+
+include ActionDispatch::Http::Cache::Request
+include ActionDispatch::Http::MimeNegotiation
+include ActionDispatch::Http::Parameters
+include ActionDispatch::Http::FilterParameters
+include ActionDispatch::Http::URL
+
+env = { "Content-Type" => "text/html"}
+headers = ActionDispatch::Http::Headers.new(env)
+headers["Content-Type"]
+request.parameters 和 params 是不同的,params还包括了 path_parameters
+
+Rails.application.config.filter_parameters += [:password]
+config.filter_redirect << 'www.rubyonrails.org'
+Rails.application.config.filter_redirect << 'www.rubyonrails.org'
+
+require 'action_dispatch'
+routes = ActionDispatch::Routing::RouteSet.new
+routes.draw do
+  get '/' => 'mainpage#index'
+  get '/page/:id' => 'mainpage#show'
+end
+
+include Rails.application.routes.url_helpers
+include Rails.application.routes.url_helpers
+include Rails.application.routes.url_helpers
+
+Routing::RouteSet::Dispatcher.new(defaults)
 
 
 
