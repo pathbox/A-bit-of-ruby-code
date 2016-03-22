@@ -266,7 +266,7 @@ include Rails.application.routes.url_helpers
 Routing::RouteSet::Dispatcher.new(defaults)
 
 
-#在 Controller 里，除了实例变量，我们还可以有其它方法传递内容给 View，两者方式类似。
+#在 Controller 里，除了实例变量，我们还可以有其它方法传递内容给 View，两者方式类似。不可用于实际项目
 
 class BasicController < ActionController::Base
 
@@ -294,6 +294,19 @@ class BasicController < ActionController::Base
     "controller context!"
   end
 end
+
+#下面 helper 分类，只是为了方便理清它们的结构。实际过程中，可交叉使用，能达
+#到目的即可，并且直接写 HTML 也是允许的。
+#"#{有的方法根据其参数，可归于多个分类。如：表单元素和通用元素(非表单元素)。
+#"因为 Rails 背后会把所有 helper 方法(函数)都会被放进同一个 module 里，所以它们之间互相调用。
+
+<table>
+<% @items.each do |item| %>
+   <tr class="<%= cycle("odd", "even") -%>">
+     <td>item</td>
+   </tr>
+ <% end %>
+</table>
 
 
 
