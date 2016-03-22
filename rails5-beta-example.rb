@@ -266,9 +266,34 @@ include Rails.application.routes.url_helpers
 Routing::RouteSet::Dispatcher.new(defaults)
 
 
+#在 Controller 里，除了实例变量，我们还可以有其它方法传递内容给 View，两者方式类似。
 
+class BasicController < ActionController::Base
 
+  # 1 只引入对应模块
+  include ActionView::Context
 
+  # 2 调用对应模块里的方法
+  before_filter :_prepare_context
+
+  def hello_world
+    @value = "Hello World"
+  end
+
+  protected
+  # 3 更改 view_context
+  # 默认是 ActionView::Base 的实例对象
+
+  def view_context
+    self
+  end
+
+  # 在view里可以调用此方法
+
+  def __controller_method__
+    "controller context!"
+  end
+end
 
 
 
