@@ -300,20 +300,81 @@ end
 #"#{有的方法根据其参数，可归于多个分类。如：表单元素和通用元素(非表单元素)。
 #"因为 Rails 背后会把所有 helper 方法(函数)都会被放进同一个 module 里，所以它们之间互相调用。
 
-<table>
-<% @items.each do |item| %>
-   <tr class="<%= cycle("odd", "even") -%>">
-     <td>item</td>
-   </tr>
- <% end %>
-</table>
+# <table>
+# <% @items.each do |item| %>
+#    <tr class="<%= cycle("odd", "even") -%>">
+#      <td>item</td>
+#    </tr>
+#  <% end %>
+# </table>
+#
 
+class Person
+  include ActiveModel::Validations
+  attr_accessor :name
 
+  validates :name, title: true
 
+  ActiveRecord::Base.class_eval do
+    def self.validates_date_of(*attr_names)
+      validates_with TitleValidator, _merge_attributes(attr_names)
+    end
+  end
+end
 
+cat = Cat.new(name: 'Gorby', status: 'yawning')
+cat.assign_attributes(status: 'sleeping')
+cat.attributes
+#原理上它和直接赋值是一样的，用了元编程一个个属性直接赋值，只是对要传递的参数多了ForbiddenAttributesProtection
 
+class Person
+  include ActiveModel::AttributeMethods
+  attribute_method_prefix 'clear_'
+  attribute_method_suffix '_contrived?'
+  attribute_method_affix prefix: 'reset_', suffix: '_to_default!'
+  define_attribute_methods :name
+end
 
+# Strong Parameters 是黑名单，params在controller层面 permit后状态变成permitted进入白名单，只有permit属性才能进入我们系统
 
+class Person
+  include ActiveModel::ForbiddenAttributesProtection
+end
+
+serializable_hash
+serializable_hash
+serializable_hash
+
+class Person
+  extend ActiveModel::Callbacks
+  define_model_callbacks :update
+end
+
+class Person < ActiveRecord::Base
+  params = ActionController::Parameters.new(name: 'Bob')
+  person.new(params) # => ActiveModel::ForbiddenAttributesError
+  params.permit!
+  Person.new(params) # => #<Person id: nil, name: "Bob">
+end
+
+#运用中间态，也就是Relation。每次查询并不是真正的查询（因为还没有走到SQL层面），而是保存一个中间状态，当你所有的查询条件都写完了，
+#才进入SQL的层面。理论上，这些简单的查询最后都能组合成SQL语句。
+
+# 延迟加载。我们在 Controller 里有一个查询语句，结果赋值给一个实例变量，原本
+# 的意图是在 View 里显示的。某天需求更改了，我们不必再显示这个查询结果，但
+# Controller 里我们忘记删除这部分的代码(这都能忘？)，结果每次都要做大量无用的
+# 查询工作。引入中间状态后，就能起到延迟加载 的作用，不到最后的调用，不做
+# SQL 查询(停留在 Ruby 层面)。
+# 链式查询，效率高。
+#这里部分是对多个对象的操作，对Relation的操作，不是查询操作。Relation是对象，到最后才会转为SQL语句
+
+#对于要匹配的子串T来说，“abcdex”首字母“a”与后面的串“bcdex”中任意一个字符都不相等，也就是说，既然“a”不予自己后面
+#子串中任何一个字符相等，那么对于图前五位字符分别相等，意味着子串T的首字符“a”不可能与S串的第2位到第5位的字符相等。在图。2、3、4、5的判断都是多余的。
+#同样道理，在我们知道T串中首字符“a”与“T”中后面的字符均不相等的前提下，T串的“a”与S串后面的“c”、“d”、“e”
+#也都可以在1之后就可以确定是不相等的，所以这个算法中2、3、4、5没有必要，只保留1、6即可。
+#也就是说，对于在子串中有与首字符相等的字符，也是可以省略一部分不必要的判断步骤。
+#既然i值不回溯，也就是不可以变小，那么要考虑的变化就是j值了。通过观察也可发现我们屡屡提到了T串的首字符与自身后面字符的比较，
+#发现如果有相等字符，j值得变化就会不同。也就是说，这个j值的变化与主串其实没什么关系，关键就取决于T串的结构中是否有重复的问题
 
 
 
