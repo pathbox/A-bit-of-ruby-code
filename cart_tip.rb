@@ -84,3 +84,15 @@ class Order < ActiveRecord::Base
   scope :last_days, ->{ |days| where('updated< ?', days) }
   scope :checks, where(pay_type: :check)
 end
+#使用find_by_sql效率其实是更高的
+
+def add_comment
+  @article = Article.find(params[:id])
+  comment = Comment.new(params[:comment])
+  @article.comments << comment
+  @article.save
+end
+
+#使用签名ｃｏｏｋｉｅｓ　这样只能得到自己的ｃｏｏｋｉｅｓ，无法通过浏览器修改得到别人的ｃｏｏｋｉｅｓ
+
+#关键信息在ｃｏｏｋｉｅｓ中保存后要尽可能存数据库，防止ｃｏｏｋｉｅｓ丢失或删除
