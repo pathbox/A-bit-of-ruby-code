@@ -18,6 +18,10 @@ class FileUpload
 
     def results
       @results ||= Queue.new
+      if @results.nil?
+        temp = Queue.new
+        @results = temp
+      end
     end
 
     def upload_to_s3(filename, file)
