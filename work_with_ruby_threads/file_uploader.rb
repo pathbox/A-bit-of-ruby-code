@@ -19,7 +19,7 @@ class FileUpload
     def results
       @results ||= Queue.new
       if @results.nil?
-        temp = Queue.new
+        temp = Queue.newx
         @results = temp
       end
     end
