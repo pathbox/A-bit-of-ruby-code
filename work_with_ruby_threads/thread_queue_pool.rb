@@ -24,33 +24,6 @@ puts Benchmark.measure{
 #  So the scalability of this approach is clearly limited.
 # run out of resources
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Nice Way. Using The Queue to make a thread pool
 POOL_SIZE = 10
 
