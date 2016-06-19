@@ -20,7 +20,6 @@ begin
     end
   end
 
-
   my_server = MyServer.new("MyServer", 'urn:ruby:calculation', 'localhost', 9000)
   trap('INT'){
     server.shutdown
