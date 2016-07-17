@@ -49,3 +49,59 @@ def connection
     socket.close
   end
 end
+
+class SortedList
+
+  def initialize
+    @data = []
+  end
+
+  def <<(element)
+    (@data << element).sort!
+  end
+
+  def each
+    @data.each {|e| yield(e)}
+  end
+end
+
+File.open("some.txt"){|f| f << "some words"}
+
+"this is a string".instance_eval do
+  "O hai, can has reverse? #{reverse} . "
+end
+
+foo = Hash.new{ |h,k| h[k] = []}
+
+require 'socket'
+
+class Client
+  def initialize(ip = "127.0.0.1", port = "3003")
+    @ip = ip
+    @port = port
+  end
+
+  def send_message(msg)
+    connection do |socket|
+      socket.puts(msg)
+      response = socket.gets
+    end
+  end
+
+  def receive_message
+    connection do |socket|
+      response = socket.gets
+    end
+  end
+
+  private
+
+  def connection
+    socket = TCPSocket.new(@ip, @port)
+    yield(socket)
+  ensure
+    socket.close if socket
+  end
+end
+
+
