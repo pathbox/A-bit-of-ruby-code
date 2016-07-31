@@ -17,6 +17,6 @@ end
 
 puts MyOpenStrruct.new.attributes
 icecream = MyOpenStrruct.new
+p icecream.flavor # nil
 icecream.flavor = "vanilla"
 puts "The flavor: #{icecream.flavor}"
-puts MyOpenStrruct.new.attributes
