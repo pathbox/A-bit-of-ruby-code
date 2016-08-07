@@ -32,9 +32,10 @@ JSON.parse(data_s)
 #=> {"Monday"=>2, "Tuesdat"=>3, "Wednesday"=>3, "Thursday"=>20, "Friday"=>56, "Saturday"=>20, "Sunday"=>22}
 
 # .............3. How to set default value for a nested Hash?
-contacts = { "John" => { name: "John", email: "john@doe.com" },
-             "Freddy" => { name: "Freddy", email: "freddy@mercury.com" }
-           }
+contacts = {
+  "John" => { name: "John", email: "john@doe.com" },
+  "Freddy" => { name: "Freddy", email: "freddy@mercury.com" }
+}
 
 contacts["Jane"] = {}
 contacts["Jane"][:email] = "jane@doe.com"
@@ -66,12 +67,14 @@ end
 
 #............4. How to merge two nested Hashes?
 
-wish_list = { 8 => { title: 'The Color of Magic', },
-              42 => { title: 'The Hitch-Hiker"s Guide to the Galaxy', price: 5 }
-            }
-basket = { 8 => { price: 10 },
-           1729 => { title: 'Ramanujan: Twelve Lectures on Subjects Suggested by His Life and Work', price: 28 }
-         }
+wish_list = {
+  8 => { title: 'The Color of Magic', },
+  42 => { title: 'The Hitch-Hiker"s Guide to the Galaxy', price: 5 }
+}
+basket = {
+  8 => { price: 10 },
+  1729 => { title: 'Ramanujan: Twelve Lectures on Subjects Suggested by His Life and Work', price: 28 }
+}
 
 require "active_support/core_ext/hash" # not necessary if in Rails
 
@@ -124,20 +127,3 @@ updated_entries = { 1385074800 => 'CVE-2013-4164', 1372284000 => 'CVE-2013-4073'
 new_entries = updated_entries.reject { |k, _| entries.include? k }
 
 #=> {1385074800=>'CVE-2013-4164'}  找出新增的key => value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
