@@ -1,0 +1,5 @@
+source 'https://ruby.taobao.org'
+
+gem 'rack'
+gem 'websocket-rack'
+gem 'slim'
