@@ -62,4 +62,4 @@ class Server < Midori::API
 	end
 end
 
-Midori.run(Server, '127.0.0.1', 9090)
+Midori.run(Server, '127.0.0.1', 9091)
