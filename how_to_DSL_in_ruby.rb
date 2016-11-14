@@ -41,6 +41,10 @@ class Factory < BasicObject
   end
 end
 
+class User
+  attr_accessor :name, :pet_name
+end
+
 Smokestack.define do
   factory User do
     name "Gabe BW"
