@@ -1,9 +1,9 @@
 # 一种非常简单的上传单个文件的方法。只是单纯的上传, 上传文件的一种原理。IO 的写和读
 
 # view
-<%= form_tag({:action => :upload}, :multipart => true) do %>
-  <%= file_field_tag 'picture' %>
-<% end %>
+#<%= form_tag({:action => :upload}, :multipart => true) do %>
+#  <%= file_field_tag 'picture' %>
+#<% end %>
   # <%= form_for @person do |f| %>
   #   <%= f.file_field :picture %>
   # <% end %>

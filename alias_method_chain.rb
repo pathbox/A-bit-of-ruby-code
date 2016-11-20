@@ -8,7 +8,7 @@
 #     puts 'here run m1'
 #   end
 #   def m1_with_m2
-#     puts "do something befor m1"
+#     puts "do something before m1"
 #     m1_without_m2
 #     puts "do something after m2"
 #   end
@@ -18,7 +18,7 @@
 # a = A.new
 # # => #<A:0xb7bd9820>
 # a.m1
-# # do something befor m1
+# # do something before m1
 # # m1
 # # do something after m2
 # # => nil
