@@ -46,3 +46,6 @@ Klass.new.salute_without_log # => Aloha!
 # Calling method...
 # Aloha!
 # ...Method called
+
+# 这时候salute_without_log方法表示原始的salute方法
+# 现在的salute方法和salute_with_log方法都执行salute_with_log这个新的方法代码
