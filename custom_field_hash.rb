@@ -6,15 +6,16 @@ class TicketImporter
 
   def initialize(company, ticket_import_record)
     @company           = company
-    # @record            = ticket_import_record
-    # @spreadsheet       = @record.uploaded_spreadsheet
-    # @sheet             = @spreadsheet.sheet(0)
-    # @head_data         = @sheet.row(1)
-    # @template_name     = @sheet.row(2)[10]
-    # @last_row          = @sheet.last_row
-    # @row_count         = @last_row - 1
-    # @planed_count      = [@row_count, MAX_ROW].min
-    # @unsuccessful_data = []
+    @record            = ticket_import_record
+    @spreadsheet       = @record.uploaded_spreadsheet
+    @sheet             = @spreadsheet.sheet(0)
+    @head_data         = @sheet.row(1)
+    @template_name     = @sheet.row(2)[10]
+    @last_row          = @sheet.last_row
+    @row_count         = @last_row - 1
+    @planed_count      = [@row_count, MAX_ROW].min
+    @unsuccessful_data = []
+    @templates_hash    = template_custom_field_hash
   end
 
   def start_import
@@ -73,10 +74,13 @@ class TicketImporter
         options       = field.try(:options)
         is_required   = template_field.is_required
         content_type  = field.try(:content_type)
+        sort          = template_field.sort
         custom_fields.merge!({ key => { title: title,
-                                        require: is_required,
+                                        is_require: is_required,
                                         content_type: content_type,
-                                        options: options }})
+                                        options: options
+                                      }
+                             })
       end
     end
     custom_fields
@@ -225,50 +229,50 @@ class TicketImporter
     return [true, user_group_id]
   end
 
-  def validate_custom_fields(row)
+  def validate_custom_fields(columns, template_name)
     field_ary = []
-    if row[11..-1].present?
-      ticket_template = @company.ticket_templates.find_by(name: row[10])
-      custom_fields = ticket_template.template_fields.includes(:field)
-      custom_fields.each_with_index do |custom_field, index|
-        field = custom_field.try(:field)
-        i = 11 + index
-        return [false, "标题:自定义字段名称错误"] if field.title != @head_data[i]
-        return [false, "#{field.title}为必填字段"] if custom_field.is_required && row[i].blank?
-        if field && row[i].present?
+    if columns.present?
+      customer_fields = @templates_hash[template_name]
+      custom_fields.each_with_index do |custom_field, i|
+      	key   = custom_cfield.first
+      	field = custom_field.last
+      	column = column
+        return [false, "#{field.title}为必填字段"] if field.is_require && columns[i].blank?
+        if field && column.present?
           if field.content_type == "text"
-            return [false, "单行文本不能有换行"] if row[i].to_s.include?("\n")
-            field_ary << ["TextField_#{field.id}", row[i].to_s]
+            return [false, "#{column} 单行文本类型字段不能有换行"] if column.to_s.include?("\n")
+            field_ary << [key, column.to_s]
           elsif field.content_type == "area_text"
-            field_ary << ["TextField_#{field.id}", row[i].to_s]
+            field_ary << [key, column.to_s]
           elsif field.content_type == "date"
-            return [false, "#{field.title} 日期数据格式不正确"] unless row[i].to_s.strip =~ TextField::CONTENT_TYPE_PATTERNS[:date]
-            field_ary << ["TextField_#{field.id}", row[i]]
+            return [false, "#{column} 日期数据格式不正确"] unless column.to_s.strip =~ TextField::CONTENT_TYPE_PATTERNS[:date]
+            field_ary << [key, column]
           elsif field.content_type == "time"
-            return [false, "时间数据格式不正确"] unless row[i].to_s.strip =~ TextField::CONTENT_TYPE_PATTERNS[:time]
-            field_ary << ["TextField_#{field.id}", row[i]]
+            return [false, "#{column} 时间数据格式不正确"] unless column.to_s.strip =~ TextField::CONTENT_TYPE_PATTERNS[:time]
+            field_ary << [key, column]
           elsif field.content_type == "number"
-            return [false, "#{field.title} 不是正整型数据"] unless row[i].to_i > 0
-            return [false, "#{field.title} 正整型数据格式不正确"] unless row[i].to_s =~ TextField::CONTENT_TYPE_PATTERNS[:number]
-            field_ary << ["TextField_#{field.id}", row[i]]
+            return [false, "#{column} 不是正整型数据"] if column.to_i < 0 || !(column.to_s =~ TextField::CONTENT_TYPE_PATTERNS[:number])
+            field_ary << [key, column]
           elsif field.content_type == "numeric"
-            return [false, "#{field.title} 数值数据格式不正确"] unless row[i].to_s =~ TextField::CONTENT_TYPE_PATTERNS[:numeric]
-            field_ary << ["TextField_#{field.id}", row[i]]
+            return [false, "#{column} 数值数据格式不正确"] unless column.to_s =~ TextField::CONTENT_TYPE_PATTERNS[:numeric]
+            field_ary << [key, column]
           elsif field.content_type == "link"
-            return [false, "#{field.title}超链接格式不正确"] unless row[i] =~ TextField::CONTENT_TYPE_PATTERNS[:link]
-            field_ary << ["TextField_#{field.id}", row[i]]
+            return [false, "#{column}超链接格式不正确"] unless column =~ TextField::CONTENT_TYPE_PATTERNS[:link]
+            field_ary << [key, column]
           elsif ["droplist","radio"].include?(field.content_type)
-            return [false, "#{field.title}数据不正确"] unless field.options.include?(row[i].to_s.strip)
-            field_ary << ["SelectField_#{field.id}", get_index_value(row[i].to_s.strip, field.options)]
-          elsif "checkbox" == field.content_type
-            checkbox = row[i].to_s.split(",")
-            return [false, "#{field.title}数据不正确"] if (checkbox - field.options).present?
-            field_ary << ["SelectField_#{field.id}", get_index_value(row[i], field.options)]
+            return [false, "#{column} 选项不正确"] unless field.options.include?(column.to_s.strip)
+            field_ary << [key, get_index_value(column.to_s.strip, field.options)]
+          elsif field.content_type == "checkbox"
+            checkbox = column.to_s.split(",")
+            return [false, "#{column} 选项不正确"] if (checkbox - field.options).present?
+            field_ary << [key, get_index_value(column, field.options)]
           elsif field.content_type == "chained_droplist"
-            result = field.get_chained_droplist_value(row[i].to_s.strip) #[false, "#{self.title} 字段有错误"]
+            result = SelectField.get_chained_droplist_value(column.to_s.strip, field.options) #[false, "#{self.title} 字段有错误"]
             return result unless result.first
-            field_ary << ["SelectField_#{field.id}", result.last]
+            field_ary << [key, result.last]
           end
+        else
+        	field_ary << [key, column]
         end
       end
     end
