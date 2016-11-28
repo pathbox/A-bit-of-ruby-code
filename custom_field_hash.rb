@@ -10,7 +10,7 @@ class TicketImporter
     @spreadsheet       = @record.uploaded_spreadsheet
     @sheet             = @spreadsheet.sheet(0)
     @head_data         = @sheet.row(1)
-    @template_name     = @sheet.row(2)[10]
+    # @template_name     = @sheet.row(2)[10]
     @last_row          = @sheet.last_row
     @row_count         = @last_row - 1
     @planed_count      = [@row_count, MAX_ROW].min
@@ -46,7 +46,7 @@ class TicketImporter
                 attributes.merge!({user_id: customer.id})
               end
               ticket = Ticket.new(attributes)
-              ticket.save
+              ticket.save!(validate: false)
               @company.tag(row[8], ticket) if row[8].present?
             else
               @unsuccessful_data << [row, value]
@@ -59,39 +59,8 @@ class TicketImporter
       @record.update!(failure_count: @unsuccessful_data.size, treated_count: row_num - 1)
     end
     save_unsuccessful_data_to_file
-    # Sidekiq.logger.info "==================#{@unsuccessful_data}"
+    Sidekiq.logger.info "==================#{@unsuccessful_data}"
     @record.update!(completed: true)
-  end
-  def custom_fields_hash(template_name)
-    custom_fields = Hashie::Mash.new
-    template = @company.ticket_templates.find_by(name: template_name)
-    template_fields = template.template_fields.includes(:field)
-    template_fields.each do |template_field|
-      field = template_field.try(:field)
-      if field.present?
-        key           = "#{template_field.field_type}_#{template_field.field_id}"
-        title         = field.try(:title)
-        options       = field.try(:options)
-        is_required   = template_field.is_required
-        content_type  = field.try(:content_type)
-        sort          = template_field.sort
-        custom_fields.merge!({ key => { title: title,
-                                        is_require: is_required,
-                                        content_type: content_type,
-                                        options: options
-                                      }
-                             })
-      end
-    end
-    custom_fields
-  end
-
-  def template_custom_field_hash
-    templates_hash = Hashie::Mash.new
-    @company.ticket_templates.each do |template|
-      templates_hash.merge!(template.name => custom_fields_hash(template.name))
-    end
-    templates_hash
   end
 
   private
@@ -164,12 +133,12 @@ class TicketImporter
 
     template_id = @company.ticket_templates.find_by(name: row[10]).try(:id)
     return [false, '工单模板为空或不存在'] unless template_id
-    return [false, '数据工单模板不全一样,以第一行数据为准'] unless @template_name == row[10]
+    # return [false, '数据工单模板不全一样,以第一行数据为准'] unless @template_name == row[10]
     result1 = validate_email_cellphone(row[2], row[3])
     return [false, result1.last] unless result1.first
     result2 = validate_owner_and_owner_group(row[6], row[7])
     return [false, result2.last] unless result2.first
-    result3 = validate_custom_fields(row)
+    result3 = validate_custom_fields(row[11..-1], row[10])
     return [false, result3.last] unless result3.first
     status_id = Status.find_by(zh_name: row[4]).try(:id)
     priority_id = Priority.find_by(zh_name: row[5]).try(:id)
@@ -229,14 +198,46 @@ class TicketImporter
     return [true, user_group_id]
   end
 
+  def custom_fields_hash(template_name)
+    custom_fields = Hashie::Mash.new
+    template = @company.ticket_templates.find_by(name: template_name)
+    template_fields = template.template_fields.includes(:field)
+    template_fields.each do |template_field|
+      field = template_field.try(:field)
+      if field.present?
+        key           = "#{template_field.field_type}_#{template_field.field_id}"
+        title         = field.try(:title)
+        options       = field.try(:options)
+        is_required   = template_field.is_required
+        content_type  = field.try(:content_type)
+        sort          = template_field.sort
+        custom_fields.merge!({ key => { title: title,
+                                        is_require: is_required,
+                                        content_type: content_type,
+                                        options: options
+                                      }
+                             })
+      end
+    end
+    custom_fields
+  end
+
+  def template_custom_field_hash
+    templates_hash = Hashie::Mash.new
+    @company.ticket_templates.each do |template|
+      templates_hash.merge!(template.name => custom_fields_hash(template.name))
+    end
+    templates_hash
+  end
+
   def validate_custom_fields(columns, template_name)
     field_ary = []
     if columns.present?
-      customer_fields = @templates_hash[template_name]
+      custom_fields = @templates_hash[template_name]
       custom_fields.each_with_index do |custom_field, i|
-      	key   = custom_cfield.first
-      	field = custom_field.last
-      	column = column
+        key   = custom_field.first
+        field = custom_field.last
+        column = columns[i]
         return [false, "#{field.title}为必填字段"] if field.is_require && columns[i].blank?
         if field && column.present?
           if field.content_type == "text"
@@ -272,7 +273,7 @@ class TicketImporter
             field_ary << [key, result.last]
           end
         else
-        	field_ary << [key, column]
+          field_ary << [key, column]
         end
       end
     end
@@ -290,3 +291,24 @@ class TicketImporter
     indexes.join(",")
   end
 end
+
+# values = ["天津市","和平区"]
+  # options =  [["北京市", [["海淀区", [["知春路"]]]]], ["天津市", [["和平区"]]]]
+  # 级联字段数组值匹配数据库options中多维数组,返回匹配的索引下标用于工单的custom_fields自定义字段保存
+  def self.get_chained_droplist_value(value_string, field_options)
+    v = []
+    values = value_string.split("|")
+    options = field_options
+    values.each_with_index do |value, index|
+      options.each_with_index do |a, index|
+        if a[0] == value
+          v << "#{index}"
+          options = a[1]
+          options = [] if options.nil?
+        end
+      end
+    end
+    return [false, "#{value_string} 级联数据有错误"] if values.size != v.size
+    v = v.join(",")
+    return [true, v]
+  end
