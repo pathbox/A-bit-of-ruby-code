@@ -353,3 +353,25 @@ class TicketImporter
   end
 
 end
+
+Class SelectField
+# options =  [["北京市", [["海淀区", [["知春路"]]]]], ["天津市", [["和平区"]]]]
+  # 级联字段数组值匹配数据库options中多维数组,返回匹配的索引下标用于工单的custom_fields自定义字段保存
+  def self.get_chained_droplist_value(value_string, field_options)
+    v = []
+    values = value_string.split("|").map(&:strip)
+    options = field_options
+    values.each_with_index do |value, index|
+      options.each_with_index do |a, index|
+        if a[0] == value
+          v << "#{index}"
+          options = a[1]
+          options = [] if options.nil?
+        end
+      end
+    end
+    return [false, "#{value_string} 级联数据有错误"] if values.size != v.size
+    v = v.join(",")
+    return [true, v]
+  end
+end
