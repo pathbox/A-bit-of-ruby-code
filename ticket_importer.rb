@@ -24,7 +24,7 @@ class TicketImporter
       else
         ActiveRecord::Base.transaction do
           begin
-          is_valid, value = check_valid(row)
+            is_valid, value = check_valid(row)
             if is_valid
               attributes = value
               column = column(row)
@@ -39,7 +39,7 @@ class TicketImporter
                                             platform_id: Platform.manual_input.id,
                                             source_channel: 'manual',
                                             owner_group_id: group_id)
-                customer.update!(cellphone: column.c_email) if customer.id.present? && column.c_email.present?
+                customer.update!(cellphone: column.c_cellphone) if customer.id.present? && column.c_cellphone.present?
                 attributes.merge!({user_id: customer.id})
               end
               ticket = Ticket.new(attributes)
@@ -56,7 +56,6 @@ class TicketImporter
       @record.update!(failure_count: @unsuccessful_data.size, treated_count: row_num - 1)
     end
     save_unsuccessful_data_to_file
-    Sidekiq.logger.info "==================#{@unsuccessful_data}"
     @record.update!(completed: true)
   end
 
@@ -156,14 +155,13 @@ class TicketImporter
   end
 
   def validate_email_cellphone(email, cellphone)
-    customer_a_id = nil
-    customer_b_id = nil
+    customer_a_id, customer_b_id = nil, nil
     if email.present?
       return [false, "邮件格式错误"] unless email =~ EMAIL_REGEXP
       customer_a_id = @company.customers.find_in_emails(email).try(:id)
     end
     if cellphone.present?
-      return [false, "电话号码格式错误"] unless PhoneNumber.new(cellphone).valid?
+      return [false, "电话号码格式错误"] unless ::PhoneNumber.new(cellphone).valid?
       customer_b_id = @company.customers.find_in_cellphones(cellphone).try(:id)
     end
     if customer_a_id && customer_b_id
@@ -185,6 +183,7 @@ class TicketImporter
       unless @company.user_groups.where(name: group_name).exists?
         return [false, "受理客服组不存在"]
       end
+      user_group_id = @company.user_groups.find_by(name: group_name).try(:id)
     end
     if agent_email.present? && group_name.present?
       user_id = @company.agents.find_by(email: agent_email).try(:id)
@@ -235,7 +234,7 @@ class TicketImporter
       import_fields.each_with_index do |custom_field, i|
         title   = custom_field.first
         field = custom_field.last
-        _index = field[:index]  # field.index is not right
+        _index = field[:index]
         column = row[_index]
         return [false, "#{title}为必填字段"] if field.is_require && column.blank?
         if field && column.present?
@@ -290,7 +289,7 @@ class TicketImporter
     indexes.join(",")
   end
 
-  #  根据头部的命名，得到普通字段和列索引之间的map关系，用一个hash存储
+  #  根据头部的命名，得到普通字段和excel列索引之间的map关系，用一个hash存储
   def column_map
     column_hash = Hashie::Mash.new
     @head_data.each_with_index do |head, index|
