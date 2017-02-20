@@ -1,0 +1,10 @@
+---
+people:
+- !ruby/struct:Person
+  first_name: Bob
+  last_name: Smith
+- !ruby/struct:Person
+  first_name: Mary
+  last_name: Johnson
+greeting:
+  hello: world

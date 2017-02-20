@@ -1,0 +1,7 @@
+catalog:
+  song: "Hello"
+  dance: "seven years"
+Time:
+  moring: "true"
+  afternoon: "false"
+  night: "no"
