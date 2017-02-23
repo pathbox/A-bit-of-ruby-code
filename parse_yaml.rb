@@ -54,7 +54,7 @@ def to_obj(h)
       v = v.collect{|e| e.instance_of?(Hash) ? to_obj(e) : e}
     end
 
-    s.send("#{k=}".to_sym, v)
+    s.send("#{k}".to_sym, v)
   end
   s
 end
