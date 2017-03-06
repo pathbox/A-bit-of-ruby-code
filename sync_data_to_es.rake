@@ -49,8 +49,18 @@ namespace :sync_es do
     else
       puts "class param is invalid or blank"
     end
-    e = Time.now
-    x = e - s
+
+    DeleteTable.where("? < created_at and ? < created_at", s, e).find_in_batches do |records|
+      body = records.map{|record| {delete: {_id: record.id}}}
+      model.__elasticsearch__.client.bulk({
+        index: model.index_name,
+        type: model.document_type,
+        body: body
+      })
+    end
+    
+    ee = Time.now
+    x = ee - s
     puts "Sync work is done~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     puts "Time Seconds: #{x}"
   end
