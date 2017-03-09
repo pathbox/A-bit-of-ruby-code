@@ -58,7 +58,7 @@ namespace :sync_es do
         body: body
       })
     end
-    
+
     ee = Time.now
     x = ee - s
     puts "Sync work is done~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
