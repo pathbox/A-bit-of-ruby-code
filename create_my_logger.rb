@@ -22,7 +22,7 @@ def create_my_logger(file_name)
   logger = Logger.new("#{Rails.root}/log/#{file_name}")
   logger.level = Logger::DEBUG
   logger.formatter = proc do |serverity, datetime, progname, message|
-    "#{message}\n"
+    "#{datetime} #{serverity} #{progname} #{message}\n"
   end
 
   logger.extend MyLogger
