@@ -1,5 +1,5 @@
 # lib/initializers/audit_notification_subscriber.rb
-ActiveSupport::Notifications.subscribe(/audit) do |*args|
+ActiveSupport::Notifications.subscribe(/audit/) do |*args|
   data = args.last
   event_name = data[:event_name]
   audited_object = data[:audited_object]
@@ -20,3 +20,4 @@ ActiveSupport::Notifications.subscribe(/audit) do |*args|
 
     Audit.create! audit_data
   }
+end
