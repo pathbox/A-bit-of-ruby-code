@@ -23,7 +23,6 @@
 # # do something after m2
 # # => nil
 
-
 class Klass
   def salute
     puts "Aloha!"
