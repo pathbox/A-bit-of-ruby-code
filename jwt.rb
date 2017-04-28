@@ -125,6 +125,26 @@ def example6
 
 end
 
+def jwt_url
+  require 'jwt'
+
+  get '/login/sso/other-app' do
+    # assuming the user is already logged in and this is available as current_user
+    claims = {
+      id: current_user.id,
+      name: current_user.name,
+      email: current_user.email,
+      iat: Time.now.to_i
+    }
+
+    payload = JWT.encode(claims, ENV['SSO_SECRET'])
+    redirect "http://other-app.com/auth/jwt/callback?jwt=#{payload}"
+  end
+
+  # In other app , JWT.devode params[:jwt], ENV['SSO_SECRET']
+  # to get the data
+end
+
 
 
 
