@@ -16,3 +16,5 @@ def rate_bucket(time, rate, water, capacity)
     return false  # 水满了,拒绝加水
   end
 end
+
+# 限制原理是 水桶加满速度和漏水速度的比较， 如果水桶加满了，则限制产生

@@ -12,3 +12,5 @@ def rate_token(time, capacity, rate, tokens)
     return true
   end
 end
+
+# 限制的原理就是 填充的速度和 -1 的速度的比较，当-1 速度大于填充速度，使得tokens < 1的时候，就产生限制
