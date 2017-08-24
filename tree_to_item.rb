@@ -18,6 +18,24 @@ def loo(op, key='')
   end
 end
 
+def option_block_process(options, option_key='')
+  options.each do |item|
+    if option_key.present?  # option_key 是parent 的key，是外层的key
+      hkey = option_key + '_' + item["value"]
+    else
+      hkey = item["value"]
+    end
+    hkey_item = [hkey, item]
+    yield hkey_item   # 可以复用递归逻辑，而把其他处理放在外部的block
+    ops = item["subs"]
+    if ops.present?
+      chained_option_block(ops, hkey) do |value|
+        yield value
+      end
+    end
+  end
+end
+
 # =>
 # {"0"=>"西甲"}
 # {"0_0"=>"皇家马德里"}
