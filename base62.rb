@@ -27,7 +27,7 @@ class Base62
       6.times.each do |i|
         d_value = digist[i]
         if d_value.present?
-          d_value = d_value -1          #位数从0开始
+          d_value = d_value
           str = ALPHABET[d_value] + str
         else
           str = 'a' + str
@@ -37,12 +37,20 @@ class Base62
       str
     end
 
+    # 输出字符串, 长度不一定为6
+    def get_string62_no(digist)
+      str = ''
+      digist.each do |item|
+        str << ALPHABET[item]
+      end
+      str.reverse
+    end
+
     # 将str转为十进制数
     def base62_to_dec(str)
       result = 0
-      str.split(//).each_with_index do |v, i|
-        result = result + (ALPHABET.index(v) + 1) * 62**(5-i) if v != 'a'
-      end
+      base = ALPHABET.length
+      str.each_char { |c| result = result * base + ALPHABET.index(c) }
       result
     end
 
